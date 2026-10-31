@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: investment-platform-app
+    ports:
+      - "3000:3000"
+    # Secrets live in .env.production (not committed). Copy .env.production.example to start.
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      # The production database is its own file in a named volume, separate from prisma/dev.db.
+      - DATABASE_URL=file:/app/data/prod.db
+    volumes:
+      - app-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  app-data:
